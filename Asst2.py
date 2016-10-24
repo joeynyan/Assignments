@@ -113,7 +113,7 @@ def constraint_check(graph, color):
 				return False
 	return True
 
-if backtrack_maxDegree(graph, color):
+if backtrack_maxDegree(graph, color) and constraint_check(graph, color):
 	for x in color:
 		print x, '\t', color[x]
 else:
