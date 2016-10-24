@@ -88,14 +88,22 @@ def backtrack_maxDegree(graph, color):
 		if node not in visited:
 			visited.append(node)
 			for x in graph[node]:
-				if len(color[x]) > 1:
-					color[x].remove(color[node][0])
+				if x in visited:
+					pass
+				else:
+					if color[node][0] in color[x]:
+						color[x].remove(color[node][0])
+					else:
+						return False
+				# if len(color[x]) > 1:
+				# 	color[x].remove(color[node][0])
 			nextNode = least_constrain(graph, color)
 			if nextNode > 0:
 				stack.append(nextNode)
 				# print 'Next Node: ', nextNode
 			# else:
 			# 	print 'No node'
+	return True
 
 def constraint_check(graph, color):
 	for x in graph:
@@ -105,12 +113,16 @@ def constraint_check(graph, color):
 				return False
 	return True
 
-backtrack_maxDegree(graph, color)
-if constraint_check(graph, color):
+if backtrack_maxDegree(graph, color):
 	for x in color:
 		print x, '\t', color[x]
 else:
-	print 'Legal Coloring Does Not Exist'
+	print 'No Legal Colorings Exist'
+# if constraint_check(graph, color):
+# 	for x in color:
+# 		print x, '\t', color[x]
+# else:
+# 	print 'Legal Coloring Does Not Exist'
 
 
 
