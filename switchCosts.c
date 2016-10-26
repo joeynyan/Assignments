@@ -101,7 +101,8 @@ void processSwitch(){
   pid_t childpid;
   int singleByte;
   char readbuffer[1];
-  char *inputbuffer = 'A';
+  char inputbuffer[1];
+  char returnstring[] = "D";
 
   pipe(pipeP);
   pipe(pipeC);
@@ -115,13 +116,16 @@ void processSwitch(){
     close(pipeP[1]); // closes input side of parent pipe
 
     singleByte = read(pipeP[0], readbuffer, 1);
-    printf("Message received: %s", readbuffer);
+    printf("Parent Sends: %s\n", readbuffer);
+    write(pipeC[1], returnstring, 1);
   } else {
     close(pipeC[1]);
     close(pipeP[0]);
 
+    inputbuffer[0] = 'A';
     write(pipeP[1], inputbuffer, 1);
-    printf("Child sends: %s", readbuffer);
+    singleByte = read(pipeC[0], readbuffer, 1);
+    printf("Child sends: %s\n", readbuffer);
 
     wait(NULL);
     // return(0);
