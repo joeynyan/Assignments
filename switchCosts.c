@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
-#include <strings.h>
+#include <string.h>
 
 unsigned long long timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)
 {
@@ -98,14 +98,14 @@ int main()
 
 
 void processSwitch(){
-  int pipeP[2];
-  int pipeC[2];
+  int pipeP[2]; // pipe child uses to contact parent
+  int pipeC[2]; // pipe parent uses to contact child 
 
   pid_t childpid;
   int singleByte;
-  char readbuffer[1];
-  char inputbuffer[1];
-  char returnstring[1];
+  char readbuffer[] = "A";
+  char inputbuffer[] = "B";
+  char returnstring[] = "C";
 
   pipe(pipeP);
   pipe(pipeC);
@@ -118,19 +118,15 @@ void processSwitch(){
     close(pipeC[0]); // closes output side of child pipe
     close(pipeP[1]); // closes input side of parent pipe
 
-    bzero((char *) &readbuffer, 1);
-    singleByte = read(pipeP[0], readbuffer, 1);
+    singleByte = read(pipeP[0], readbuffer, sizeof(readbuffer));
     printf("Parent Sends: %s\n", readbuffer);
-    returnstring[0] = 'D';
-    write(pipeC[1], returnstring, 1);
+    write(pipeC[1], returnstring, (strlen(returnstring)));
   } else {
     close(pipeC[1]); // closes input side of child pipe
     close(pipeP[0]); // closes output side of parent pipe
 
-    bzero((char *) &inputbuffer, sizeof(inputbuffer));
-    inputbuffer[0] = 'A';
-    write(pipeP[1], inputbuffer, 1);
-    singleByte = read(pipeC[0], readbuffer, 1);
+    write(pipeP[1], inputbuffer, (strlen(inputbuffer)));
+    singleByte = read(pipeC[0], readbuffer, sizeof(readbuffer));
     printf("Child send: %s\n", readbuffer);
 
     wait(NULL);
