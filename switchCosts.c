@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <time.h>
+#include <strings.h>
 
 unsigned long long timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)
 {
@@ -102,7 +105,7 @@ void processSwitch(){
   int singleByte;
   char readbuffer[1];
   char inputbuffer[1];
-  char returnstring[] = "D";
+  char returnstring[1];
 
   pipe(pipeP);
   pipe(pipeC);
@@ -115,17 +118,20 @@ void processSwitch(){
     close(pipeC[0]); // closes output side of child pipe
     close(pipeP[1]); // closes input side of parent pipe
 
+    bzero((char *) &readbuffer, 1);
     singleByte = read(pipeP[0], readbuffer, 1);
     printf("Parent Sends: %s\n", readbuffer);
+    returnstring[0] = 'D';
     write(pipeC[1], returnstring, 1);
   } else {
-    close(pipeC[1]);
-    close(pipeP[0]);
+    close(pipeC[1]); // closes input side of child pipe
+    close(pipeP[0]); // closes output side of parent pipe
 
+    bzero((char *) &inputbuffer, sizeof(inputbuffer));
     inputbuffer[0] = 'A';
     write(pipeP[1], inputbuffer, 1);
     singleByte = read(pipeC[0], readbuffer, 1);
-    printf("Child sends: %s\n", readbuffer);
+    printf("Child send: %s\n", readbuffer);
 
     wait(NULL);
     // return(0);
