@@ -1,47 +1,35 @@
-import sys
+import sys # allows command line args to be inputted
 
-test = {
-	1 : [2, 3, 4, 6, 7, 10],
-	2 : [1, 3, 4, 5, 6],
-	3 : [1, 2],
-	4 : [1, 2],
-	5 : [2, 6],
-	6 : [1, 2, 5, 7, 8],
-	7 : [1, 6, 8, 9, 10],
-	8 : [6, 7, 9],
-	9 : [7, 8, 10],
-	10 : [1, 7, 9],
-}
-
-print "Number of args: %d" %len(sys.argv)
+# print "Number of args: %d" %len(sys.argv)
 if len(sys.argv) < 2:
 	fp = input("Please specify an input file:")
 else:
 	fp = sys.argv[1]
 
+# Code to open file for reading and start parsing
 file = open(fp, "r")
 VertColour = file.readline().strip('(').split()
 VertColour = [int(x) for x in VertColour]
 
 # setColour = ['r', 'y', 'g', 'b']
-graph = dict()
-color = dict()
+graph = dict() # stores adjacency list of graph
+color = dict() # stores possible coloring options for graph
 
+# parses the graph
 while True:
 	line = file.readline().replace('(','').replace(')','').split()
 
 	if line:
 		line = [int(x) for x in line]
 		graph.update({line[0]: line[1:]})
-		color.update({line[0]: range(0,VertColour[1])})
+		color.update({line[0]: range(1,VertColour[1]+1)})
 	if not line: break
 
+print 'Inputed graph is:'
 for x in graph:
-	print x, graph[x] #, '\t', len(graph[x]), color[x]
+	print x, graph[x] #, '\t', len(graph[x]) , color[x]
 
-# print 'Greatest Degree: ', max(graph, key = lambda x: len(graph[x]))
-
-
+# Depth first search
 def depth_first_search(graph):
 	maxDeg = max(graph, key = lambda x: len(graph[x]))
 	stack = [maxDeg]
@@ -54,12 +42,11 @@ def depth_first_search(graph):
 			print graph[node]
 			stack.extend(graph[node])
 
-
-# depth_first_search(graph)
-
+# searches through all possible nodes in graph using minimum remaining variable heuristic
+# then uses degree heuristic to break the ties and return one
 def least_constrain(graph, color):
 	lcv = []
-	minConstrain = 15
+	minConstrain = (len(graph)+1)
 	maxDeg = 0
 	key = -1
 	for x in color:
@@ -76,15 +63,15 @@ def least_constrain(graph, color):
 			key = x
 	return key
 
-
+# searches through the graph and assigns colorings according to mrv, degree heuristic, and lcv
 def backtrack_maxDegree(graph, color):
 	maxDeg = max(graph, key = lambda x: len(graph[x]))
 	stack = [maxDeg]
 	visited = []
 	while stack:
 		node = stack.pop(0)
-		# print node
-		color[node] = [color[node].pop(0)]
+		if len(color[node]) > 1:
+			color[node] = [color[node].pop(0)]
 		if node not in visited:
 			visited.append(node)
 			for x in graph[node]:
@@ -93,18 +80,15 @@ def backtrack_maxDegree(graph, color):
 				else:
 					if color[node][0] in color[x]:
 						color[x].remove(color[node][0])
-					else:
-						return False
-				# if len(color[x]) > 1:
-				# 	color[x].remove(color[node][0])
 			nextNode = least_constrain(graph, color)
 			if nextNode > 0:
 				stack.append(nextNode)
-				# print 'Next Node: ', nextNode
+				# print 'Stack: ', stack
 			# else:
 			# 	print 'No node'
 	return True
 
+# Double check that all constraints are correct
 def constraint_check(graph, color):
 	for x in graph:
 		assigned = color[x][0]
@@ -113,16 +97,15 @@ def constraint_check(graph, color):
 				return False
 	return True
 
+# Decides if legal coloring exist or doesn't
+print(' ')
 if backtrack_maxDegree(graph, color) and constraint_check(graph, color):
+	print 'Legal Coloring Available'
 	for x in color:
-		print x, '\t', color[x]
+		print 'Node: ', x, '\t', color[x]
 else:
 	print 'No Legal Colorings Exist'
-# if constraint_check(graph, color):
-# 	for x in color:
-# 		print x, '\t', color[x]
-# else:
-# 	print 'Legal Coloring Does Not Exist'
+
 
 
 
