@@ -37,15 +37,23 @@ goals.insert(0, query);
 
 #backward chaining
 def solve(goals):
+	print "goals: " ,goals
 	if not goals:
 		return True
 	a = goals.pop(0)
+	print "Currently solving: ", a
 	for x in range(len(rule)):
 		if rule[x][0] == a:
 			print "SubGoals are: ", rule[x][1:]
-			if solve(goals.extend(rule[x][1:])) == True:
+			goals.extend(rule[x][1:])
+			boo = solve(goals)
+			if boo == True:
+				if [a] not in rule:
+					rule.append([a])
 				print a, "is true"
 				return True
 	return False
 
 print solve(goals)
+for x in range(len(rule)):
+	print rule[x]
